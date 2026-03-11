@@ -43,7 +43,7 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
               <!-- Read More Link -->
               <%= link_to blog_post, 
-                  class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm" do %>
+                  class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm mr-auto" do %>
                 Read more
                 <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -53,18 +53,17 @@
               <!-- Post Meta (Optional - add if you have timestamps) -->
               <% if blog_post.respond_to?(:created_at) %>
                 
-                  <%if blog_post.published_at.nil? %>
-                    <span class="text-xs text-gray-400">Draft</span>
-                  <%elsif blog_post.published_at > Time.current %>
-                    <span class="text-xs text-yellow-400">Scheduled</span>
+                  <%if blog_post.draft? %>
+                    <span class="text-xs text-gray-400 mr-2">Draft</span>
+                  <%elsif blog_post.scheduled? %>
+                    <span class="text-xs text-yellow-400 mr-2">Scheduled</span>
                   <%else %>
-                    <span class="text-xs text-green-400">Published</span>
+                    <span class="text-xs text-green-400 mr-2">Published</span>
                   <% end %>
 
                     <span class="text-xs text-gray-400">
-                      <%= blog_post.published_at != nil ? time_ago_in_words(blog_post.published_at) : "" %>
-                   
-                      <%= blog_post.published_at != nil ? Time.current - (blog_post.published_at || 0) < 0 ? "from now" : "ago" : "" %> 
+                      <%= blog_post.draft? ? "" : time_ago_in_words(blog_post.published_at)  %>
+                      <%= blog_post.draft? ? "" : Time.current - (blog_post.published_at || 0) < 0 ? "from now" : "ago" %> 
                     </span>
 
               <% end %>
