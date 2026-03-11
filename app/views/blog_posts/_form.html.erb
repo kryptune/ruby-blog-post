@@ -11,16 +11,19 @@
   <% end %>
 
   <div class="field <%= 'empty' if form.object.title.blank? %>">
-    <%= form.label :title %><br>
-    <%= form.text_field :title %>
+    <%= form.label :title, class: " text-sm font-medium text-gray-700" %><br>
+    <%= form.text_field :title,   class: "mt-1 block w-full border rounded-md p-2"%>
   </div>
 
   <div class="field <%= 'empty' if form.object.body.blank? %>">
-    <%= form.label :body %><br>
-    <%= form.text_area :body %>
+    <%= form.label :body, class: " text-sm font-medium text-gray-700"  %><br>
+    <%= form.text_area :body, class: "mt-1 block w-full border rounded-md p-2" %>
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.label :published_at, "Published Date:", class: "block text-sm font-medium text-gray-700 mt-4 mb-2" %>
+    <%= form.datetime_select :published_at, include_blank: true, class: "border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
   </div>
+
+    <%= form.submit class:" mt-4  p-3 rounded-2xl text-center ml-auto text-base text-[#ffffff] bg-blue-400" %>
 <% end %>
