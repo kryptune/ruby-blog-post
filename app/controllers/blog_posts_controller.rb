@@ -70,11 +70,11 @@ class BlogPostsController < ApplicationController
 
   def set_blog_post_status
     if @blog_post.published_at == nil
-      @blog_post.status.draft!
+      @blog_post.draft!
     elsif  @blog_post.published_at > Time.current
-      @blog_post.status.scheduled!
+      @blog_post.scheduled!
     else
-      @blog_post.status.published!
+      @blog_post.published!
     end
   end
 
