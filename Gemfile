@@ -73,3 +73,11 @@ end
 gem "devise", "~> 5.0"
 
 gem "tailwindcss-rails", "~> 4.4"
+
+gem 'sidekiq'
+
+gem 'sidekiq-scheduler'
+
+gem 'dotenv-rails', groups: [:development, :test]
+
+gem "rspec", "~> 3.0"

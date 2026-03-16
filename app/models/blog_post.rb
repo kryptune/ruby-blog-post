@@ -1,19 +1,14 @@
 class BlogPost < ApplicationRecord
   validates :title, :body, presence: true
+  enum :status, {draft: 0, scheduled: 1, published: 2}
 
-  scope :draft, -> {where(published_at: nil)}
-  scope :published, -> {where("published_at <= ?", Time.current )}
-  scope :scheduled, -> {where("published_at > ?", Time.current )}
+  after_update_commit :broadcast_status_change, if: :saved_change_to_status?
 
-  def draft?
-    published_at.nil?
-  end
-  def published?
-    published_at.present? && published_at <= Time.current 
-  end
+  private
 
-  def scheduled?
-    published_at.present? && published_at > Time.current 
+  def broadcast_status_change
+    Rails.logger.info "Broadcasting status change for blog post #{id} to #{status}"
+    broadcast_replace_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
   end
 
 end
