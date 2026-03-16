@@ -1,20 +1,11 @@
 <div class="space-y-6">
   <!-- Header Section -->
-  <div class="flex items-center justify-between">
-    <div>
+  <%= turbo_stream_from "blog_posts" %>
+  <div class="flex items-center justify-between" >
+    <div id="blog_posts_counter" class="mb-4">
       <h1 class="text-4xl font-bold text-gray-900">Blog Posts</h1>
-      <p class="mt-2 text-gray-600">
-        <%= link_to "All posts: #{user_signed_in? ? @blog_posts_all.count : @blog_posts_all.published.count}", blog_posts_path, class: params[:status].nil? ? "font-bold hover:text-blue-600 transition-colors" : "" %>
-        <% if user_signed_in?%>
-        (
-        <%= link_to "Published: #{@blog_posts_all.published.count}", blog_posts_path(status: :published), class: params[:status] == "published" ? "font-bold" : "hover:text-green-600 transition-colors" %>,
-        <%= link_to "Scheduled: #{@blog_posts_all.scheduled.count}", blog_posts_path(status: :scheduled), class: params[:status] == "scheduled" ? "font-bold" : "hover:text-yellow-600 transition-colors" %>,
-        <%= link_to "Draft: #{@blog_posts_all.draft.count}", blog_posts_path(status: :draft), class: params[:status] == "draft" ? "font-bold" : "hover:text-red-600 transition-colors" %>
-        )
-        <%end%>
-      </p>
+      <%= render "blog_posts/counter" , blog_posts: @blog_posts_all, user_signed_in: user_signed_in? %>
     </div>
-
     <% if user_signed_in? %>
       <%= link_to new_blog_post_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
         New Post
@@ -23,7 +14,6 @@
   </div>
 
   <!-- Blog Posts Grid -->
-  <%= turbo_stream_from "blog_posts" %>
   <% if @blog_posts.any? %>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="blog_posts">
       <%= render @blog_posts %>
