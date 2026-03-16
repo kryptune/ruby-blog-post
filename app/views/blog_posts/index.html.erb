@@ -4,89 +4,39 @@
     <div>
       <h1 class="text-4xl font-bold text-gray-900">Blog Posts</h1>
       <p class="mt-2 text-gray-600">
-        <%= @blog_posts.count %> <%= 'post'.pluralize(@blog_posts.count) %> published
+        <%= link_to "All posts: #{user_signed_in? ? @blog_posts_all.count : @blog_posts_all.published.count}", blog_posts_path, class: params[:status].nil? ? "font-bold hover:text-blue-600 transition-colors" : "" %>
+        <% if user_signed_in?%>
+        (
+        <%= link_to "Published: #{@blog_posts_all.published.count}", blog_posts_path(status: :published), class: params[:status] == "published" ? "font-bold" : "hover:text-green-600 transition-colors" %>,
+        <%= link_to "Scheduled: #{@blog_posts_all.scheduled.count}", blog_posts_path(status: :scheduled), class: params[:status] == "scheduled" ? "font-bold" : "hover:text-yellow-600 transition-colors" %>,
+        <%= link_to "Draft: #{@blog_posts_all.draft.count}", blog_posts_path(status: :draft), class: params[:status] == "draft" ? "font-bold" : "hover:text-red-600 transition-colors" %>
+        )
+        <%end%>
       </p>
     </div>
-    
+
     <% if user_signed_in? %>
-      <%= link_to new_blog_post_path, 
-          class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
+      <%= link_to new_blog_post_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
         New Post
       <% end %>
     <% end %>
   </div>
 
   <!-- Blog Posts Grid -->
+  <%= turbo_stream_from "blog_posts" %>
   <% if @blog_posts.any? %>
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <% @blog_posts.each do |blog_post| %>
-        <article class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden group">
-          <!-- Post Header with Color Accent -->
-          <div class="h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-          
-          <!-- Post Content -->
-          <div class="p-6">
-            <!-- Title -->
-            <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-              <%= link_to blog_post.title, blog_post, class: "hover:underline" %>
-            </h2>
-            
-            <!-- Body Preview -->
-            <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3 h-[70px]">
-              <%= truncate(blog_post.body, length: 150) %>
-            </p>
-            
-            <!-- Footer -->
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
-              <!-- Read More Link -->
-              <%= link_to blog_post, 
-                  class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm mr-auto" do %>
-                Read more
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              <% end %>
-              
-              <!-- Post Meta (Optional - add if you have timestamps) -->
-              <% if blog_post.respond_to?(:created_at) %>
-                
-                  <%if blog_post.draft? %>
-                    <span class="text-xs text-gray-400 mr-2">Draft</span>
-                  <%elsif blog_post.scheduled? %>
-                    <span class="text-xs text-yellow-400 mr-2">Scheduled</span>
-                  <%else %>
-                    <span class="text-xs text-green-400 mr-2">Published</span>
-                  <% end %>
-
-                    <span class="text-xs text-gray-400">
-                      <%= blog_post.draft? ? "" : time_ago_in_words(blog_post.published_at)  %>
-                      <%= blog_post.draft? ? "" : Time.current - (blog_post.published_at || 0) < 0 ? "from now" : "ago" %> 
-                    </span>
-
-              <% end %>
-            </div>
-          </div>
-        </article>
-      <% end %>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="blog_posts">
+      <%= render @blog_posts %>
     </div>
   <% else %>
-    <!-- Empty State -->
     <div class="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
-      <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      <h3 class="mt-4 text-lg font-medium text-gray-900">No blog posts yet</h3>
-      <p class="mt-2 text-sm text-gray-500">Get started by creating your first blog post.</p>
-      
-      <% if user_signed_in? %>
-        <%= link_to new_blog_post_path, 
-            class: "mt-6 inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" do %>
-          Create your first post
+      <h3 class="mt-4 text-lg font-medium text-gray-900">
+        <% if params[:status] == "draft" %>No draft posts yet
+        <% elsif params[:status] == "scheduled" %>No scheduled posts yet
+        <% else %>No published posts yet
         <% end %>
-      <% end %>
+      </h3>
+      <p class="mt-2 text-sm text-gray-500">Get started by creating your first blog post.</p>
     </div>
   <% end %>
 </div>
