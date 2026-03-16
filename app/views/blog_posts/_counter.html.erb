@@ -1,0 +1,11 @@
+
+      <p class="mt-2 text-gray-600" id="blog_posts_counter">
+        <%= link_to "All posts: #{user_signed_in ? blog_posts.count : blog_posts.published.count}", blog_posts_path, class: params[:status].nil? ? "font-bold hover:text-blue-600 transition-colors" : "" %>
+        <% if user_signed_in%>
+        (
+        <%= link_to "Published: #{blog_posts.published.count}", blog_posts_path(status: :published), class: params[:status] == "published" ? "font-bold" : "hover:text-green-600 transition-colors" %>,
+        <%= link_to "Scheduled: #{blog_posts.scheduled.count}", blog_posts_path(status: :scheduled), class: params[:status] == "scheduled" ? "font-bold" : "hover:text-yellow-600 transition-colors" %>,
+        <%= link_to "Draft: #{blog_posts.draft.count}", blog_posts_path(status: :draft), class: params[:status] == "draft" ? "font-bold" : "hover:text-red-600 transition-colors" %>
+        )
+        <%end%>
+      </p>  
