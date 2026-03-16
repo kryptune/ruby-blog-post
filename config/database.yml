@@ -1,23 +1,30 @@
-
-  #username: kryptune
-  #password: eSupport1730
-  #host: localhost
 default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost') %>
 
 development:
-  <<: *default
-  database: blog_development
+  primary:
+    <<: *default
+    database: blog_development
+
+  queue:
+    <<: *default
+    database: blog_development_queue
+    migrations_paths: db/queue_migrate
 
 test:
-  <<: *default
-  database: blog_test
+  primary:
+    <<: *default
+    database: blog_test
 
-production:
-  <<: *default
-  url: <%= ENV['DATABASE_URL'] %>
+  queue:
+    <<: *default
+    database: blog_test_queue
+    migrations_paths: db/queue_migrate
 
 production:
   primary:
@@ -26,7 +33,8 @@ production:
 
   queue:
     <<: *default
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV['QUEUE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
+    migrations_paths: db/queue_migrate
 
   cable:
     <<: *default
