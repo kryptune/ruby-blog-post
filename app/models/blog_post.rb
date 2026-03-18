@@ -2,6 +2,8 @@ class BlogPost < ApplicationRecord
   validates :title, :body, presence: true
   enum :status, {draft: 0, scheduled: 1, published: 2}
   has_many :comments, dependent: :destroy
+  has_one_attached :cover_image
+  has_many_attached :images
 
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?

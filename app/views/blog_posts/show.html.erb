@@ -41,6 +41,15 @@
       <!-- Post Body -->
       <div class="prose prose-lg max-w-none">
         <%= simple_format(@blog_post.body, {}, sanitize: false) %>
+        <div class="p-6 grid grid-cols-2 gap-6">
+          <% @blog_post.images.each do |image| %>
+            <% if image.variable? %>
+              <div class="flex flex-col align-content-center">
+              <%= image_tag image.variant(resize_to_fit: [300, 300])  %>
+              </div>
+            <%end%>
+          <% end %>
+        </div>
       </div>
 
       <!-- Edit Button (for logged-in users) -->
