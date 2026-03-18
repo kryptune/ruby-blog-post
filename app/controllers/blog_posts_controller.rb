@@ -14,7 +14,11 @@ class BlogPostsController < ApplicationController
     @blog_posts = @blog_posts.order(created_at: :desc)
   end
 
-  def show;  end
+  def show
+    @comment   = @blog_post.comments.build
+    @comments = @blog_post.comments.includes(:user, :blog_post)
+
+  end
 
 
   def new

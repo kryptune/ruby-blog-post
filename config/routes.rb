@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
- resources :blog_posts # shorthand for all the routes below, except root
+  resources :blog_posts # shorthand for all the routes below, except root
+  resources :blog_posts do
+    resources :comments, only: [:create, :destroy, :edit, :update]
+  end
 
   # get "/blog_posts/new", to: "blog_posts#new", as: :new_blog_post
   # get "/blog_posts/:id", to: "blog_posts#show", as: :blog_post
@@ -16,5 +19,7 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }
+
   root "blog_posts#index"
+
 end
