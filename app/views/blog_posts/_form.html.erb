@@ -17,7 +17,31 @@
 
   <div class="field <%= 'empty' if form.object.body.blank? %>">
     <%= form.label :body, class: " text-sm font-medium text-gray-700"  %><br>
-    <%= form.text_area :body, class: "mt-1 block w-full border rounded-md p-2" %>
+    <%= form.text_area :body, class: "my-4 block w-full border rounded-md p-2 min-h-50" %>
+    <!-- Show existing images -->
+    <% if blog_post.images.attached? %>
+      <h3 class= "text-xl font-large">Current Images:</h3>
+      <div class="grid grid-cols-2 gap-4 p-6 " >
+      <% blog_post.images.each do |image| %>
+        <% if image.variable? %>
+          <div class="flex flex-col align-content-center">
+            <%= image_tag image.variant(resize_to_limit: [200, 200]) %>
+            <div class="flex justify-center">
+              <%= check_box_tag "blog_post[remove_images][]", image.id %>
+              <%= label_tag "blog_post_remove_images_#{image.id}", "Remove this image" %>
+            </div>
+          </div>
+        <%end%>
+      <% end %>
+      </div>
+    <% end %>
+
+    <!-- Add new images -->
+    <div>
+      <%= form.label :images, "Add new images:" %>
+      <%= form.file_field :images, multiple: true, direct_upload: true, class:"flex justify-center items-center" %>
+    </div>
+
   </div>
 
   <div>

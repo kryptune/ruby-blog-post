@@ -40,11 +40,19 @@ class BlogPostsController < ApplicationController
   def edit; end
 
   def update
-
-    if @blog_post.update(blog_post_params)
+    if @blog_post.update(blog_post_params.except(:images))
       set_blog_post_status
       @blog_post.save
-
+      # Attach new images if any were uploaded
+      if blog_post_params[:images]
+        @blog_post.images.attach(blog_post_params[:images])
+      end
+      # Purge selected images
+      if params[:blog_post][:remove_images]
+        params[:blog_post][:remove_images].each do |id|
+          @blog_post.images.find(id).purge
+        end
+      end
       redirect_to @blog_post, notice: "Blog post was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -63,7 +71,7 @@ class BlogPostsController < ApplicationController
   private
 
   def blog_post_params
-    params.require(:blog_post).permit(:title, :body, :published_at)
+    params.require(:blog_post).permit(:title, :body, :published_at, images: [])
   end
 
   def set_blog_post
