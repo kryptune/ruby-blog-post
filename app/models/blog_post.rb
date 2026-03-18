@@ -31,7 +31,7 @@ class BlogPost < ApplicationRecord
   end
 
   def broadcast_delete_post
-    # Update blog posts grid 
+    # Remove blog post from the grid 
       broadcast_remove_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
 
     # Update counter for the new counts

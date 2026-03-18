@@ -16,7 +16,7 @@ class BlogPostsController < ApplicationController
 
   def show
     @comment   = @blog_post.comments.build
-    @comments = @blog_post.comments.includes(:user, :blog_post)
+    @comments = @blog_post.comments.includes(:user, :blog_post).order(created_at: :desc)
 
   end
 

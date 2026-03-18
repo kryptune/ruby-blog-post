@@ -1,37 +1,38 @@
-<!-- app/views/comments/_comment.html.erb -->
-<div id="<%= dom_id(comment) %>" class="bg-white rounded-lg border border-gray-200 p-4 mb-2 hover:shadow-md transition-shadow ">
-  <p class="text-gray-800 leading-relaxed mb-3">
-    <%= comment.body %>
-  </p>
-  
-  <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-        <%= comment.user.email.split('@').first.first.upcase %>
-      </div>
-      
-      <div>
-        <p class="text-sm font-medium text-gray-900">
-          <%= comment.user.email.split('@').first %>
-        </p>
-        <% if comment.respond_to?(:created_at) %>
-          <p class="text-xs text-gray-500">
-            <%= time_ago_in_words(comment.created_at) %> ago
-          </p>
-        <% end %>
-      </div>
-    </div>
+<div id="<%= dom_id(comment) %>">
+    <turbo-frame id="comment">
+        <div id="comment_<%= dom_id(comment) %>" class="bg-white rounded-lg border border-gray-200 p-4 mb-2 hover:shadow-md transition-shadow ">
+            <p class="text-gray-800 leading-relaxed mb-3">
+                <%= comment.body %>
+            </p>
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        <%= comment.user.email.split('@').first.first.upcase %>
+                    </div>
+                <div>
+                <p class="text-sm font-medium text-gray-900">
+                    <%= comment.user.email.split('@').first %>
+                </p>
+                <% if comment.respond_to?(:created_at) %>
+                    <p class="text-xs text-gray-500">
+                        <%= time_ago_in_words(comment.created_at) %> ago
+                    </p>
+                <% end %>
+            </div>
+        </div>
 
-    <% if user_signed_in? && current_user == comment.user %>
-      <div class="flex items-center gap-2">
-        <%= link_to "Edit", edit_blog_post_comment_path(comment.blog_post, comment), 
-            class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
-        
-        <%= button_to "Delete", blog_post_comment_path(comment.blog_post, comment), 
-            method: :delete, 
-            data: { turbo_confirm: "Are you sure?" },
-            class: "text-sm text-red-600 hover:text-red-700 font-medium" %>
-      </div>
-    <% end %>
-  </div>
+        <% if user_signed_in %>
+            <div class="flex items-center gap-2">
+                <%= link_to "Edit", edit_blog_post_comment_path(comment.blog_post, comment), 
+                    class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+                
+                <%= button_to "Delete", blog_post_comment_path(comment.blog_post, comment), 
+                    method: :delete, 
+                    data: { turbo_confirm: "Are you sure?" },
+                    class: "text-sm text-red-600 hover:text-red-700 font-medium" %>
+            </div>
+        <% end %>
+        </div>
+        </div>
+    </turbo-frame>
 </div>
