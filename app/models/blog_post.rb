@@ -1,6 +1,8 @@
 class BlogPost < ApplicationRecord
   validates :title, :body, presence: true
   enum :status, {draft: 0, scheduled: 1, published: 2}
+  has_many :comments, dependent: :destroy
+
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
   after_create_commit :broadcast_new_blog_post
@@ -29,7 +31,7 @@ class BlogPost < ApplicationRecord
   end
 
   def broadcast_delete_post
-    # Update blog posts grid 
+    # Remove blog post from the grid 
       broadcast_remove_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
 
     # Update counter for the new counts
