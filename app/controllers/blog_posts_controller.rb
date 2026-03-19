@@ -5,7 +5,7 @@ class BlogPostsController < ApplicationController
 
   def index
     @blog_posts_all = BlogPost.all.order(updated_at: :desc)
-    @blog_posts = user_signed_in? ? BlogPost.all.order(updated_at: :desc) : BlogPost.published.order(updated_at: :desc)
+    @blog_posts = login? ? BlogPost.all.order(updated_at: :desc) : BlogPost.published.order(updated_at: :desc)
 
     if params[:status].present?
       @blog_posts = @blog_posts.public_send(params[:status])
@@ -17,7 +17,6 @@ class BlogPostsController < ApplicationController
   def show
     @comment   = @blog_post.comments.build
     @comments = @blog_post.comments.includes(:user, :blog_post).order(created_at: :desc)
-
   end
 
 
@@ -67,6 +66,14 @@ class BlogPostsController < ApplicationController
     end
   end
 
+  def translate
+      translator = TranslationService.new
+      result = translator.translate(@blog_post.body, params[:lang] || "es")
+      @translated_body = result.to_s # force string
+      render partial: "blog_posts/translate", locals: { translated_body: @translated_body }
+      Rails.logger.info "Translated body: #{@translated_body.inspect}"
+  end 
+
 
   private
 
@@ -75,7 +82,7 @@ class BlogPostsController < ApplicationController
   end
 
   def set_blog_post
-    @blog_post = user_signed_in? ? BlogPost.all.find(params[:id]) : BlogPost.published.find(params[:id])
+    @blog_post = login? ? BlogPost.all.find(params[:id]) : BlogPost.published.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: "Blog post not found."
   end
@@ -93,7 +100,7 @@ class BlogPostsController < ApplicationController
 
 
   def  authenticate_user
-    unless user_signed_in?
+    unless login?
       redirect_to new_user_session_path, alert:"You must sign in to continue" 
     end
   end
