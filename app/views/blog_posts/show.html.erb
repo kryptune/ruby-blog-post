@@ -1,86 +1,125 @@
 <div class="max-w-4xl mx-auto">
-  <!-- Back Button -->
-  <%= link_to blog_posts_path, class: "inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors" do %>
-    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back to all posts
-  <% end %>
+    <!-- Back Button -->
+    <%= link_to blog_posts_path, class: "inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to all posts
+    <% end %>
 
-  <!-- Post Card -->
-  <article class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <!-- Header with Gradient -->
-    <div class="h-3 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-    
-    <!-- Post Content -->
-    <div class="p-8 sm:p-12">
-      <!-- Title -->
-      <h1 class="text-4xl font-bold text-gray-900 mb-6 leading-tight">
-        <%= @blog_post.title %>
-      </h1>
+    <!-- Post Card -->
+    <article class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <!-- Header with Gradient -->
+      <div class="h-3 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+      
+      <!-- Post Content -->
+      <div class="px-10 pt-12 pb-8">
+        <span class="inline-block text-xs font-semibold tracking-widest uppercase text-violet-500 border-b border-violet-400 pb-0.5 mb-5">Article</span>
 
-      <!-- Post Meta (if you have timestamps and author) -->
-      <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
-        <% if @blog_post.respond_to?(:created_at) %>
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <%= @blog_post.created_at.strftime("%B %d, %Y") %>
-          </div>
-        <% end %>
-        
-        <% if @blog_post.respond_to?(:updated_at) && @blog_post.updated_at != @blog_post.created_at %>
-          <span class="text-sm text-gray-400">•</span>
-          <div class="text-sm text-gray-600">
-            Updated <%= time_ago_in_words(@blog_post.updated_at) %> ago
-          </div>
-        <% end %>
-      </div>
+        <!-- Title -->
+        <h1 class="font-serif text-4xl font-black text-gray-900 leading-tight mb-6 max-w-3xl">
+          <%= @blog_post.title %>
+        </h1>
 
-      <!-- Post Body -->
-      <div class="prose prose-lg max-w-none">
-        <%= simple_format(@blog_post.body, {}, sanitize: false) %>
-        <div class="p-6 grid grid-cols-2 gap-6">
-          <% @blog_post.images.each do |image| %>
-            <% if image.variable? %>
-              <div class="flex flex-col align-content-center">
-              <%= image_tag image.variant(resize_to_fit: [300, 300])  %>
-              </div>
-            <%end%>
+        <!-- Post Meta (if you have timestamps and author) -->
+        <div class="flex items-center gap-4 pb-6 border-b border-gray-200">
+          <% if @blog_post.respond_to?(:created_at) %>
+            <div class="flex items-center text-sm text-gray-600">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <%= @blog_post.created_at.strftime("%B %d, %Y") %>
+            </div>
+          <% end %>
+          
+          <% if @blog_post.respond_to?(:updated_at) && @blog_post.updated_at != @blog_post.created_at %>
+            <span class="text-sm text-gray-400">•</span>
+            <div class="text-sm text-gray-600">
+              Updated <%= time_ago_in_words(@blog_post.updated_at) %> ago
+            </div>
           <% end %>
         </div>
       </div>
 
-      <!-- Edit Button (for logged-in users) -->
+        <%# Post Body %>
+        <div class="px-10 pb-6">
+          <div class="text-gray-900 text-base leading-relaxed font-light max-w-2xl">
+            <turbo-frame id="translate">
+              <%= simple_format(@blog_post.body, {}, sanitize: false) %>
+            </turbo-frame>
+          </div>
+
+          <%# Translate Widget %>
+          <%= form_with url: translate_blog_post_path(@blog_post),
+            method: :get,
+            data: { turbo_frame: "translate" },
+            local: true do |form| %>
+              <div class="mt-8 flex items-center gap-3 flex-wrap p-4 bg-gray-50 border border-gray-200 rounded-sm">
+                <span class="text-xs font-semibold tracking-widest uppercase text-gray-400">Translate to:</span>
+                <%= form.select :lang, options_for_select(translation_languages),
+                    {},
+                    class: "text-sm border border-gray-200 bg-white text-gray-700 px-3 py-1.5 rounded-sm focus:outline-none focus:border-amber-400" %>
+                <%= form.submit "Go",
+                    class: "text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-gray-900 text-white rounded-sm hover:bg-amber-500 transition-colors cursor-pointer" %>
+              </div>
+          <% end %>
+
+          <%# Images %>
+          <% if @blog_post.images.any? %>
+            <div class="mt-10 grid grid-cols-2 gap-4">
+              <% @blog_post.images.each do |image| %>
+                <% if image.variable? %>
+                  <div class="overflow-hidden rounded-sm border border-gray-100 bg-gray-50 flex items-center justify-center">
+                    <%= image_tag image.variant(resize_to_fit: [300, 300]), class: "w-full h-full object-cover hover:scale-105 transition-transform duration-500" %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+      </div>
+
+      <%# Edit Bar %>
       <% if user_signed_in? %>
-        <div class="mt-10 pt-8 border-t border-gray-200">
-          <%= link_to edit_blog_post_path(@blog_post), 
-              class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        <div class="px-10 py-6 border-t border-gray-100 bg-gray-50">
+          <%= link_to edit_blog_post_path(@blog_post),
+              class: "inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-xs font-semibold tracking-widest uppercase rounded-sm hover:bg-amber-500 transition-colors" do %>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
-            Edit Post
+            Edit post
           <% end %>
         </div>
       <% end %>
-    </div>
-  </article>
 
+    </article>
+
+  <%# Comments Section %>
   <%= turbo_stream_from [@blog_post, :comments] %>
-  <%= render "comments/form", blog_post: @blog_post, comment: @blog_post.comments.build%>
-  <div id="comments">
-    <%= render @comments, user_signed_in: user_signed_in? %>
+
+  <div class="mt-14">
+    <h2 class="text-2xl font-bold text-gray-900 mb-1">Discussion</h2>
+    <p class="text-sm text-gray-400 font-light mb-8">Share your thoughts on this post</p>
+
+    <div class="bg-white border border-gray-200 rounded-sm shadow-sm p-8 mb-4">
+      <%= render "comments/form", blog_post: @blog_post, comment: @blog_post.comments.build %>
+    </div>
+
+    <div id="comments" class="space-y-3">
+      <%= render @comments, user_signed_in: user_signed_in? %>
+    </div>
   </div>
 
-  <div class="mt-8 bg-gray-50 rounded-xl border border-gray-200 p-8">
-    <h3 class="text-xl font-bold text-gray-900 mb-4">Enjoyed this post?</h3>
-    <p class="text-gray-600 mb-4">Check out more articles on our blog.</p>
-    <%= link_to root_path, 
-        class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium" do %>
+  <%# Browse CTA %>
+  <div class="mt-10 bg-gray-900 rounded-sm p-10 flex items-center justify-between gap-6 flex-wrap">
+    <div>
+      <h3 class="text-xl font-bold text-white mb-1">Enjoyed this post?</h3>
+      <p class="text-sm text-gray-400 font-light">Explore more writing on the blog.</p>
+    </div>
+    <%= link_to root_path,
+        class: "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-bold tracking-widest uppercase rounded-sm hover:bg-amber-300 transition-colors whitespace-nowrap" do %>
       Browse all posts
-      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
       </svg>
     <% end %>
   </div>

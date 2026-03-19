@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   resources :blog_posts # shorthand for all the routes below, except root
   resources :blog_posts do
+    member do
+      get :translate
+    end
     resources :comments, only: [:create, :destroy, :edit, :update]
   end
 
@@ -15,7 +18,10 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  
+  post "/sign_up", to: "users#create"
+  post "/login", to: "auth#login"
+  get "/me",  to: "users#me"
+  post "/logout", to: "auth#logout"
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }
