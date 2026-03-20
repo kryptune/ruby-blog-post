@@ -1,5 +1,4 @@
 class CommentsController < ApplicationController
-  before_action :authenticate_user, except: [ :create]
   before_action :set_comment, except: [ :create]
 
   def create
@@ -40,12 +39,6 @@ class CommentsController < ApplicationController
   def set_comment
     @blog_post = BlogPost.find(params[:blog_post_id])
     @comment   = @blog_post.comments.find(params[:id])
-  end
-
-  def authenticate_user
-    unless user_signed_in?
-      redirect_to new_user_session_path, alert:"You must sign in to continue" 
-    end
   end
 
 end

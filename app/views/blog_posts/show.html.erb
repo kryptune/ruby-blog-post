@@ -79,7 +79,7 @@
       </div>
 
       <%# Edit Bar %>
-      <% if user_signed_in? %>
+      <% if logged_in? %>
         <div class="px-10 py-6 border-t border-gray-100 bg-gray-50">
           <%= link_to edit_blog_post_path(@blog_post),
               class: "inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-xs font-semibold tracking-widest uppercase rounded-sm hover:bg-amber-500 transition-colors" do %>
@@ -105,7 +105,7 @@
     </div>
 
     <div id="comments" class="space-y-3">
-      <%= render @comments, user_signed_in: user_signed_in? %>
+      <%= render @comments, logged_in: logged_in? %>
     </div>
   </div>
 

@@ -18,7 +18,7 @@ class BlogPost < ApplicationRecord
     # Update the status of blog post
       broadcast_replace_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
     # Update the counter for the published, scheduled and draft
-      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, user_signed_in: true }
+      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
   end
 
   def broadcast_new_blog_post
@@ -29,7 +29,7 @@ class BlogPost < ApplicationRecord
       locals: { blog_post: self }
 
     # Update counter for the new counts
-      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, user_signed_in: true }
+      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
   end
 
   def broadcast_delete_post
@@ -37,7 +37,7 @@ class BlogPost < ApplicationRecord
       broadcast_remove_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
 
     # Update counter for the new counts
-      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, user_signed_in: true }
+      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
   end
 
 end
