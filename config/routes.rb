@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  post "/register", to: "users#create"
+  get "/register", to: "users#register"
+  get "/login", to: "auth#login"
+  post "/login", to: "auth#create"
+  get "/refresh", to: "auth#refresh"
+  get "/me",  to: "users#me"
+  delete "/logout", to: "auth#logout"
+
   resources :blog_posts # shorthand for all the routes below, except root
   resources :blog_posts do
     member do
@@ -18,13 +26,9 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  post "/sign_up", to: "users#create"
-  post "/login", to: "auth#login"
-  get "/me",  to: "users#me"
-  post "/logout", to: "auth#logout"
-  devise_for :users, controllers: {
-    sessions: 'users/sessions'
-  }
+  # devise_for :users, controllers: {
+  #   sessions: 'users/sessions'
+  # }
 
   root "blog_posts#index"
 
