@@ -1,8 +1,22 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable,
-         :recoverable, :rememberable, :validatable
+  has_secure_password
   has_many :comments, dependent: :destroy
+
+  validates :password, presence: true, confirmation: true,
+                       length: { minimum: 8,
+                                 message: "must be at least 8 characters long" }
+  validate :password_complexity
+  validates :email, presence: true, uniqueness: true
+  validates :username, presence: true, uniqueness: true
+  validates :terms, acceptance: true
+  private
+
+  def password_complexity
+    return if password.blank?
+
+    unless password.match?(/\d/) && password.match?(/[A-Z]/) && password.match?(/[a-z]/)
+      errors.add :password, "must include at least one uppercase letter, one lowercase letter, and one digit"
+    end
+  end
 
 end

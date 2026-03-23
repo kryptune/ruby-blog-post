@@ -4,9 +4,9 @@
   <div class="flex items-center justify-between" >
     <div id="blog_posts_counter" class="mb-4">
       <h1 class="text-4xl font-bold text-gray-900">Blog Posts</h1>
-      <%= render "blog_posts/counter" , blog_posts: @blog_posts_all, user_signed_in: user_signed_in? %>
+      <%= render "blog_posts/counter" , blog_posts: @blog_posts_all, logged_in: logged_in? %>
     </div>
-    <% if user_signed_in? %>
+    <% if logged_in? %>
       <%= link_to new_blog_post_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
         New Post
       <% end %>

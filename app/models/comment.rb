@@ -15,7 +15,7 @@ class Comment < ApplicationRecord
     broadcast_prepend_to [blog_post, :comments],
       target: "comments",
       partial: "comments/comment",
-      locals: {comment: self , user_signed_in: true}
+      locals: {comment: self , logged_in: true}
   end
 
   def broadcast_delete_comment
@@ -29,7 +29,7 @@ class Comment < ApplicationRecord
     broadcast_replace_to [blog_post, :comments], 
     target: "comment_#{id}",
     partial: "comments/comment",
-    locals: {comment: self , user_signed_in: true}
+    locals: {comment: self , logged_in: true}
   end
 
 end
