@@ -16,7 +16,7 @@ class BlogPost < ApplicationRecord
   def broadcast_status_change
     Rails.logger.info "Broadcasting status change for blog post #{id} to #{status}"
     # Update the status of blog post
-      broadcast_replace_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
+      broadcast_update_to "blog_posts", target: "blog_post_status", partial: "blog_posts/status", locals: { blog_post: self }
     # Update the counter for the published, scheduled and draft
       broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
   end
