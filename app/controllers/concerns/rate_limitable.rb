@@ -7,11 +7,7 @@ module RateLimitable
     allowed, retry_after = limiter.allowed?(user_id)
 
     unless allowed
-      render json: {
-        error: 'Too Many Requests',
-        message: "Rate limit exceeded. Try again in #{retry_after} seconds."
-      }, status: :too_many_requests,
-      headers: { 'Retry-After' => retry_after.to_s }
+      redirect_to register_path, alert: "Too many attempts. Try again in #{retry_after > 60 ? "#{retry_after / 60} minutes" : "#{retry_after} seconds"} ."
     end
   end
 
