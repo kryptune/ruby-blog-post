@@ -1,4 +1,8 @@
 class BlogPostsController < ApplicationController
+  include RateLimitable
+  before_action only: [:create] do
+    check_rate_limit(limit: 20, window: 60)     # create post
+  end
   before_action :store_user_location!, if: :storable_location?
   before_action :set_blog_post, except: [ :index, :new, :create ]
 
