@@ -24,12 +24,12 @@ class AuthController < ApplicationController
         cookies.signed[:jwt] = { value: access_token,
           httponly: true,   # Prevents JavaScript access (XSS protection)
           secure: Rails.env.production?, # Only send over HTTPS in production
-          same_site: :strict # Prevents CSRF by blocking cross-site requests
+          same_site: Rails.env.production? ? :strict : :lax  # strict in prod, lax in dev
         }
         cookies.signed[:refresh_jwt] = { value: refresh_token,         
           httponly: true,   # Prevents JavaScript access (XSS protection)
           secure: Rails.env.production?, # Only send over HTTPS in production
-          same_site: :strict # Prevents CSRF by blocking cross-site requests
+          same_site: Rails.env.production? ? :strict : :lax  # strict in prod, lax in dev
         }
 
         redirect_to blog_posts_path, notice: "Logged in successfully!"
@@ -49,7 +49,7 @@ class AuthController < ApplicationController
         end
       end
     else
-      render json: { error: "Please verify your email before logging in." }, status: :unauthorized
+      redirect_to login_path, alert: "Please verify your email before logging in."
     end
   end
 

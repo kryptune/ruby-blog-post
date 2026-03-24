@@ -1,10 +1,14 @@
-
 FactoryBot.define do
   factory :user do
-    email { Faker::Internet.email }
-    username { Faker::Internet.username(specifier: 5..10) }
+    sequence(:email) { |n| "user#{n}@example.com" }
+    sequence(:username) { |n| "username#{n}" }
+
     password { "Password1" }
     password_confirmation { "Password1" }
     terms { true }
+    email_verified { true }
+
+    # Optional: auto-generate a verification token if your model requires it
+    verification_token { SecureRandom.hex(20) }
   end
 end

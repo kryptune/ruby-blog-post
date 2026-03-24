@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :authorize, only: [:register, :create]
+  skip_before_action :authorize, only: [:register, :create, :verify]
   include RateLimitable
   before_action only: [:create] do
     check_rate_limit(limit: 3, window: 3600)    # register
@@ -23,14 +23,14 @@ class UsersController < ApplicationController
       cookies.signed[:jwt] = { value: access_token,         
         httponly: true,   # Prevents JavaScript access (XSS protection)
         secure: Rails.env.production?, # Only send over HTTPS in production
-        same_site: :strict # Prevents CSRF by blocking cross-site requests
+        same_site: Rails.env.production? ? :strict : :lax  # strict in prod, lax in dev
       }
       cookies.signed[:refresh_jwt] = { value: refresh_token,         
         httponly: true,   # Prevents JavaScript access (XSS protection)
         secure: Rails.env.production?, # Only send over HTTPS in production
-        same_site: :strict # Prevents CSRF by blocking cross-site requests
+        same_site: Rails.env.production? ? :strict : :lax  # strict in prod, lax in dev
       }
-      UserMailer.verification_email(@user).deliver_later
+      UserMailer.verification_email(@user).deliver_now
       redirect_to login_path, notice: "Account created, verify your email now!"
 
     else
@@ -42,10 +42,13 @@ class UsersController < ApplicationController
   def verify
     user = User.find_by(verification_token: params[:token])
     if user
-      user.update(email_verified: true, verification_token: nil)
-      redirect_to root_path, notice: "Email verified successfully!"
+      if user.update_columns(email_verified: true, verification_token: nil)
+        redirect_to blog_posts_path, notice: "Email verified successfully!"
+      else
+        redirect_to login_path, alert: "Verification failed: #{user.errors.full_messages.join(', ')}"
+      end
     else
-      redirect_to root_path, alert: "Invalid or expired verification link."
+      redirect_to login_path, alert: "Invalid or expired verification link."
     end
   end
 

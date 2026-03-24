@@ -5,6 +5,7 @@ class BlogPostsController < ApplicationController
   end
   before_action :store_user_location!, if: :storable_location?
   before_action :set_blog_post, except: [ :index, :new, :create ]
+  before_action :require_verified_user
 
   def index
     @blog_posts_all = BlogPost.all.order(updated_at: :desc)
@@ -100,6 +101,11 @@ class BlogPostsController < ApplicationController
     end
   end
 
+  def require_verified_user
+    decoded = JWT.decode(cookies.signed[:jwt], Rails.application.secret_key_base, true, algorithm: 'HS256')
+    user = User.find(decoded[0]["user_id"])
+    redirect_to login_path unless user.email_verified
+  end
 
 
   def  authenticate_user

@@ -74,7 +74,8 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= begin
       decoded = JWT.decode(cookies.signed[:jwt], Rails.application.secret_key_base, true, algorithm: 'HS256')
-      User.find(decoded[0]["user_id"])
+      user = User.find(decoded[0]["user_id"])
+      user.email_verified == true ? user : nil
     rescue JWT::DecodeError, JWT::ExpiredSignature
       nil
     end

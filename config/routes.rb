@@ -1,10 +1,10 @@
 Rails.application.routes.draw do
   post "/register", to: "users#create"
   get "/register", to: "users#register"
+  get '/verify', to: 'users#verify'
   get "/login", to: "auth#login"
   post "/login", to: "auth#create"
   get "/refresh", to: "auth#refresh"
-  get "/me",  to: "users#me"
   delete "/logout", to: "auth#logout"
 
   resources :blog_posts # shorthand for all the routes below, except root
@@ -30,6 +30,6 @@ Rails.application.routes.draw do
   #   sessions: 'users/sessions'
   # }
 
-  root "blog_posts#index"
-
+  root "auth#login"
+  mount LetterOpenerWeb::Engine, at: "/letter_opener"
 end

@@ -7,11 +7,11 @@
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        <%= comment.user.email.split('@').first.first.upcase %>
+                        <%= comment.user.username.first.upcase %>
                     </div>
                 <div>
                 <p class="text-sm font-medium text-gray-900">
-                    <%= comment.user.email.split('@').first %>
+                    <%= comment.user.username %>
                 </p>
                 <% if comment.respond_to?(:created_at) %>
                     <p class="text-xs text-gray-500">
