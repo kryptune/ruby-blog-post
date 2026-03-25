@@ -1,6 +1,6 @@
 class BlogPostsController < ApplicationController
-  include RateLimitable, DecodeToken, RenderFlash
-  skip_before_action :authorize, only: [:index, :show, :translate]  # guests can read
+  include RateLimitable, TokenManager, RenderFlash
+  skip_before_action :authorize, only: [:index, :show, :translate]
   before_action only: [:create] do
     check_rate_limit(limit: 20, window: 60)     # create post
   end
@@ -9,6 +9,7 @@ class BlogPostsController < ApplicationController
   before_action :require_verified_user, except: [:index, :show , :translate]
 
   def index
+
     @blog_posts_all = BlogPost.all.order(updated_at: :desc)
     @blog_posts = logged_in? ? BlogPost.all.order(updated_at: :desc) : BlogPost.published.order(updated_at: :desc)
 
@@ -48,7 +49,6 @@ class BlogPostsController < ApplicationController
     if @blog_post.update(blog_post_params.except(:images))
       set_blog_post_status
       @blog_post.save
-      # Attach new images if any were uploaded
       if blog_post_params[:images]
         @blog_post.images.attach(blog_post_params[:images])
       end

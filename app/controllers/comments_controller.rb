@@ -1,5 +1,5 @@
 class CommentsController < ApplicationController
-  include RateLimitable
+  include RateLimitable, RenderFlash
   before_action only: [:create] do
     check_rate_limit(limit: 30, window: 60)     # create comment
   end
@@ -11,7 +11,7 @@ class CommentsController < ApplicationController
     @comment.user = current_user  # assuming you have authentication
 
     if @comment.save
-      redirect_to @blog_post, notice: "Comment added!"
+      render_flash("Comment added!", @blog_post, type: :notice)
     else
       render "blog_posts/show", status: :unprocessable_entity
     end
@@ -23,12 +23,12 @@ class CommentsController < ApplicationController
 
   def destroy
     @comment.destroy
-    redirect_to @blog_post, notice: "Comment deleted."
+    render_flash("Comment deleted.", @blog_post, type: :notice)
   end
 
   def update
     if @comment.update(comment_params)
-      redirect_to @blog_post, notice: "Comment has been successfully updated."
+      render_flash("Comment has been successfully updated.", @blog_post, type: :notice)
     else
       render :edit, status: :unprocessable_entity
     end
