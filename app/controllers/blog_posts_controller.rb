@@ -1,10 +1,12 @@
 class BlogPostsController < ApplicationController
-  include RateLimitable
+  include RateLimitable, DecodeToken, RenderFlash
+  skip_before_action :authorize, only: [:index, :show, :translate]  # guests can read
   before_action only: [:create] do
     check_rate_limit(limit: 20, window: 60)     # create post
   end
   before_action :store_user_location!, if: :storable_location?
   before_action :set_blog_post, except: [ :index, :new, :create ]
+  before_action :require_verified_user, except: [:index, :show , :translate]
 
   def index
     @blog_posts_all = BlogPost.all.order(updated_at: :desc)
@@ -15,6 +17,7 @@ class BlogPostsController < ApplicationController
     end
 
     @blog_posts = @blog_posts.order(created_at: :desc)
+
   end
 
   def show
@@ -100,12 +103,8 @@ class BlogPostsController < ApplicationController
     end
   end
 
-
-
-  def  authenticate_user
-    unless logged_in?
-      redirect_to login_path, alert:"You must sign in to continue" 
-    end
+  def require_verified_user
+    redirect_to api_v1_login_path unless current_user&.email_verified
   end
 
   def storable_location?
@@ -115,4 +114,5 @@ class BlogPostsController < ApplicationController
   def store_user_location!
     store_location_for(:user, request.fullpath)
   end
+
 end

@@ -13,7 +13,7 @@
 
     <!-- Registration Card -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-      <%= form_with url: register_path, method: :post, local: true, scope: nil do |f| %>
+      <%= form_with url: api_v1_register_path, method: :post, local: true, scope: nil do |f| %>
         
         <!-- Username Field -->
         <div class="mb-6">
@@ -86,7 +86,7 @@
 
       <!-- Login Link -->
       <div class="text-center">
-        <%= link_to "Sign in instead", login_path, 
+        <%= link_to "Sign in instead", api_v1_login_path, 
             class: "text-blue-600 hover:text-blue-700 font-semibold" %>
       </div>
     </div>

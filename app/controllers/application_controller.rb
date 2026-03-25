@@ -1,86 +1,49 @@
-# class ApplicationController < ActionController::Base
-#   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-#   allow_browser versions: :modern
-
-#   # Changes to the importmap will invalidate the etag for HTML responses
-#   stale_when_importmap_changes
-# end
-
-
 class ApplicationController < ActionController::Base
+  include SignCookies, RenderFlash, RefreshAccessToken, DecodeToken
   before_action :authorize
   helper_method :current_user, :logged_in?
 
   private
   
-  # def auth_header
-  #   request.headers['Authorization']
-  # end
-
-  # def decoded_token
-  #   if auth_header
-  #     token = auth_header.split(' ')[1]
-  #     begin
-  #       JWT.decode(token, Rails.application.secret_key_base, true, algorithm: 'HS256')
-  #     rescue JWT::DecodeError
-  #       nil
-  #     end
-  #   end
-  # end
-
-  
   def authorize
-    header = cookies.signed[:jwt] || request.headers["Authorization"]
-    return head :unauthorized unless header
+    header = cookies.signed[:jwt] || extract_bearer_token
+    unless header
+      respond_to do |format|
+        format.json { head :unauthorized }
+        format.html { redirect_to api_v1_login_path, alert: "Please log in first" }
+      end
+      return
+    end
 
     begin
-      decoded = JWT.decode(header, Rails.application.secret_key_base, true, algorithm: 'HS256')
+      decoded = decode_token(header)
       @current_user = User.find(decoded[0]["user_id"])
     rescue JWT::ExpiredSignature
-      # Access token expired → try refresh
-      refresh_token = cookies.signed[:refresh_jwt]
+      decoded = decode_token(header, skip_verification: false)
+      user = User.find(decoded[0]["user_id"])
+      refresh_token = cookies.signed[:refresh_jwt] || user.refresh_token
       if refresh_token
-        begin
-          decoded_refresh = JWT.decode(refresh_token, Rails.application.secret_key_base, true, algorithm: 'HS256')
-          user = User.find(decoded_refresh[0]["user_id"])
-
-          # Issue new access token
-          new_access_token = JWT.encode(
-            { user_id: user.id, exp: 1.minutes.from_now.to_i },
-            Rails.application.secret_key_base, 'HS256'
-          )
-          cookies.signed[:jwt] = { value: new_access_token, httponly: true }
-          @current_user = user
-        rescue JWT::ExpiredSignature
-          # Refresh token also expired → force login
-          redirect_to login_path, alert: "Session expired, please log in again"
-          return
-        rescue JWT::DecodeError
-          redirect_to login_path, alert: "Invalid refresh token"
-          return
-        end
+        refresh_access_token(user, refresh_token)
       else
-        redirect_to login_path, alert: "No refresh token found"
-        return
+        render_flash("No refresh token found", api_v1_login_path, status: :unauthorized) and return
       end
     rescue JWT::DecodeError
-      redirect_to login_path, alert: "Invalid token"
-      return
+      render_flash("Invalid token", api_v1_login_path, status: :unauthorized) and return
     end
   end
 
-
+  def extract_bearer_token(header: "Authorization")
+    token = request.headers[header]
+    token&.start_with?("Bearer ") ? token.split(" ").last : nil
+  end
 
   def current_user
-    @current_user ||= begin
-      decoded = JWT.decode(cookies.signed[:jwt], Rails.application.secret_key_base, true, algorithm: 'HS256')
-      User.find(decoded[0]["user_id"])
-    rescue JWT::DecodeError, JWT::ExpiredSignature
-      nil
-    end
+    @current_user
   end
 
   def logged_in?
     !!current_user
   end
+
+
 end
