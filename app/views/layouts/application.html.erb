@@ -41,14 +41,14 @@
               <span class="text-sm text-gray-600">
                 Welcome, <span class="font-semibold text-gray-900"><%= current_user.username %></span>
               </span>
-              <%= button_to "Logout", logout_path, 
+              <%= button_to "Logout", api_v1_logout_path, 
                   method: :delete, 
                   class: "px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium text-sm" %>
             <%else%>
-              <%= link_to "Login",login_path, 
+              <%= link_to "Login", api_v1_login_path, 
                   method: :get, 
                   class: "px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium text-sm" %>
-              <%= link_to "Register",register_path, 
+              <%= link_to "Register", api_v1_register_path, 
                   method: :get, 
                   class: "px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium text-sm" %>
             <% end %>

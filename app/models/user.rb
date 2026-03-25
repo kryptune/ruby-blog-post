@@ -3,9 +3,9 @@ class User < ApplicationRecord
   before_create :generate_verification_token
   has_many :comments, dependent: :destroy
 
-  validates :password, presence: true, confirmation: true,
-                       length: { minimum: 8,
-                                 message: "must be at least 8 characters long" }
+  # validates :password, presence: true, confirmation: true,
+  #                      length: { minimum: 8,
+  #                                message: "must be at least 8 characters long" }
   validate :password_complexity
   validates :email, presence: true, uniqueness: true
   validates :username, presence: true, uniqueness: true
