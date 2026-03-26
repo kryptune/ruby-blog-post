@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe RateLimitable, type: :controller do
   # use AuthController as the test subject since it includes RateLimitable
-  controller(AuthController) do
+  controller(Api::V1::AuthController) do
     def create
       render json: { message: 'ok' }, status: :ok
     end
@@ -37,7 +37,8 @@ RSpec.describe RateLimitable, type: :controller do
 
       5.times { post :create }  # use up the limit
       post :create              # this should be blocked
-
+      
+      expect(flash[:alert]).to include("Too many attempts. Try again in")
       expect(response).to have_http_status(:too_many_requests)
     end
   end
@@ -54,6 +55,8 @@ RSpec.describe RateLimitable, type: :controller do
       post :create
 
       expect(response).to have_http_status(:too_many_requests)
+      expect(flash[:alert]).to include("Too many attempts. Try again in")
+
     end
   end
 end
