@@ -6,6 +6,8 @@ class Api::V1::AuthController < ApplicationController
     check_rate_limit(limit: 5, window: 60)      # login
   end
 
+  def login; end
+
   def create
     user = User.find_by(email: params[:email])
     if user&.authenticate(params[:password])
@@ -14,10 +16,10 @@ class Api::V1::AuthController < ApplicationController
         payload = json_opts(user, access_token )
         respond_to_format(payload, blog_posts_path, "Welcome back!", type: :notice)
       else
-        render_flash("Please verify your email before logging in.", api_v1_login_path, status: :unauthorized ) and return
+        render_flash("Please verify your email before logging in.", api_v1_login_path, status: :unauthorized )
       end
     else
-      render_flash("Invalid Credentials.", api_v1_login_path, status: :forbidden ) and return
+      render_flash("Invalid Credentials.", api_v1_login_path, status: :forbidden )
     end
   end
 

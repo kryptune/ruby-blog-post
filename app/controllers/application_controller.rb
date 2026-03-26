@@ -1,28 +1,23 @@
 class ApplicationController < ActionController::Base
-  include RenderFlash, TokenManager, RespondToFormat, GetHeader
+  include RenderFlash, TokenManager, RespondToFormat
   before_action :authorize
   helper_method :current_user, :logged_in?
 
   private
   
   def authorize
-    header = getHeader
-    unless header
+    header_token = get_header_token
+    unless header_token
       json_opts = { status: :unauthorized }
       respond_to_format(json_opts, api_v1_login_path, "Please log in.")
       return
     end
 
     begin
-      decoded = decode_token(header)
+      decoded = decode_token(header_token)
       user = User.find(decoded[0]["user_id"])
     rescue JWT::ExpiredSignature
-      refresh_token = get_refresh_token(header)
-      if refresh_token
-        refresh_access_token(user, refresh_token)
-      else
-        render_flash("No refresh token found", api_v1_login_path, status: :unauthorized) and return
-      end
+      handle_refresh(header_token: header_token)
     rescue JWT::DecodeError
       render_flash("Invalid token", api_v1_login_path, status: :unauthorized) and return
     end

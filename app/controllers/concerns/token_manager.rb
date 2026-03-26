@@ -23,8 +23,8 @@ module TokenManager
     JWT.encode(payload, ENV['JWT_SECRET_KEY'], 'HS256')
   end
 
-  def decode_token(header, verification: true)
-    JWT.decode(header, ENV['JWT_SECRET_KEY'], verification, algorithm: 'HS256')
+  def decode_token(header_token, verification: true)
+    JWT.decode(header_token, ENV['JWT_SECRET_KEY'], verification, algorithm: 'HS256')
   end
 
   def sign_cookies(access, refresh = nil)
@@ -49,7 +49,7 @@ module TokenManager
       payload =  { user_id: user.id, exp: 10.minutes.from_now.to_i }
       new_access_token = encode_token(payload)
       sign_cookies(new_access_token)                                # sets cookie → browser uses it, mobile ignores it
-      response.set_header("X-New-Access-Token", new_access_token)   # sets header → mobile uses it, browser ignores it
+      response.set_header("X-New-Access-Token", new_access_token) if request.format.json?   # sets header → mobile uses it, browser ignores it
       @current_user = user
     rescue JWT::ExpiredSignature
       remove_tokens(user)
@@ -60,23 +60,43 @@ module TokenManager
     end
   end
 
-  def get_refresh_token(header)
-    decoded = decode_token(header, verification: false)
+  def get_refresh_token(header_token)
+    decoded = decode_token(header_token, verification: false)
     user = User.find(decoded[0]["user_id"])
-    cookies.signed[:refresh_jwt] || user.refresh_token
+    refresh_token = cookies.signed[:refresh_jwt] || user.refresh_token
+    [user, refresh_token]
   end
 
   def find_user_from_token
     token = request.headers['Authorization']&.split(' ')&.last || cookies.signed[:jwt]
     return nil unless token
-
     begin
       decoded = decode_token(token) 
       User.find(decoded[0]["user_id"])
-    rescue JWT::DecodeError, JWT::ExpiredSignature
-      nil 
+    rescue JWT::ExpiredSignature
+      handle_refresh
+    rescue JWT::DecodeError
+      render_flash("Invalid token", api_v1_login_path, status: :unauthorized) and return
     end
   end
 
+  def handle_refresh(header_token: nil)
+    user, refresh_token = get_refresh_token(header_token)
+    if refresh_token
+      refresh_access_token(user, refresh_token)
+    else
+      render_flash("No refresh token found", api_v1_login_path, status: :unauthorized) and return
+    end
+  end
+  
+  def get_header_token
+    cookies.signed[:jwt] || extract_bearer_token
+  end
 
+  private
+
+  def extract_bearer_token(header: "Authorization")
+    token = request.headers[header]
+    token&.start_with?("Bearer ") ? token.split(" ").last : nil
+  end
 end
