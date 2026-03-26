@@ -74,6 +74,8 @@ group :test do
   gem "selenium-webdriver"  
   gem 'rack-test'
   gem 'mock_redis'
+  gem 'rails-controller-testing'
+
 end
 
 group :development do
