@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   include RenderFlash, TokenManager, RespondToFormat
   before_action :authorize
   helper_method :current_user, :logged_in?
+  around_action :with_user_time_zone
 
   private
   
@@ -31,5 +32,9 @@ class ApplicationController < ActionController::Base
     current_user.present?
   end
 
+  def with_user_time_zone(&block)
+    # You can eventually make this dynamic based on current_user.time_zone
+    Time.use_zone('Asia/Manila', &block)
+  end
 
 end

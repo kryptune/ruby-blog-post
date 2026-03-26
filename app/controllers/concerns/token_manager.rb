@@ -68,13 +68,13 @@ module TokenManager
   end
 
   def find_user_from_token
-    token = request.headers['Authorization']&.split(' ')&.last || cookies.signed[:jwt]
+    token = extract_bearer_token || cookies.signed[:jwt]
     return nil unless token
     begin
       decoded = decode_token(token) 
       User.find(decoded[0]["user_id"])
     rescue JWT::ExpiredSignature
-      handle_refresh
+      handle_refresh(header_token: token)
     rescue JWT::DecodeError
       render_flash("Invalid token", api_v1_login_path, status: :unauthorized) and return
     end
