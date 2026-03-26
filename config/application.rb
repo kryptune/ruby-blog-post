@@ -19,6 +19,12 @@ module Blog
     config.solid_queue.connects_to = { database: { writing: :queue } }
     # Configuration for the application, engines, and railties goes here.
     
+    # Keep database storage in UTC
+    config.active_record.default_timezone = :utc
+    
+    # Set the display time for your local environment (e.g., Manila/Naga)
+    config.time_zone = 'Asia/Manila'
+    
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     

@@ -46,9 +46,9 @@ class BlogPostsController < ApplicationController
   def edit; end
 
   def update
-    if @blog_post.update(blog_post_params.except(:images))
-      set_blog_post_status
-      @blog_post.save
+    @blog_post.assign_attributes(blog_post_params.except(:images))
+    set_blog_post_status
+    if  @blog_post.save
       if blog_post_params[:images]
         @blog_post.images.attach(blog_post_params[:images])
       end

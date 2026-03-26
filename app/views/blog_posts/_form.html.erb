@@ -46,8 +46,20 @@
 
   <div>
     <%= form.label :published_at, "Published Date:", class: "block text-sm font-medium text-gray-700 mt-4 mb-2" %>
-    <%= form.datetime_select :published_at, include_blank: true, class: "border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-    <button type="button"   data-controller="set-time-now" data-action="click->set-time-now#setNow"  data-set-time-now-prefix-value="blog_post_published_at" class= "ml-4 py-2 px-3 rounded-2xl bg-blue-400 text-base text-[#ffffff]"> Set Now </button>  
+    <div class="flex items-center">
+      <%# Use datetime_field for a modern calendar/time picker %>
+      <%= form.datetime_field :published_at, 
+          class: "border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          step: 1 %> 
+
+      <button type="button" 
+              data-controller="set-time-now" 
+              data-action="click->set-time-now#setNow" 
+              data-set-time-now-prefix-value="blog_post_published_at" 
+              class="ml-4 py-2 px-3 rounded-2xl bg-blue-400 text-base text-white hover:bg-blue-500 transition-colors">
+        Set Now
+      </button>
+    </div>
   </div>
 
     <%= form.submit class:" mt-4  p-3 rounded-2xl text-center ml-auto text-base text-[#ffffff] bg-blue-400" %>
