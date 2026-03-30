@@ -12,6 +12,11 @@ class Comment < ApplicationRecord
 
   def broadcast_new_comment
     # Update comments to show the new comment at the top
+    broadcast_replace_to [blog_post, :comments],
+      target: "new_comment",
+      partial: "comments/form",
+      locals: { blog_post: blog_post, comment: blog_post.comments.build, logged_in: true }
+
     broadcast_prepend_to [blog_post, :comments],
       target: "comments",
       partial: "comments/comment",
@@ -25,11 +30,10 @@ class Comment < ApplicationRecord
   end
 
   def broadcast_update_comment
-    # Remove the comment from the comment section
     broadcast_replace_to [blog_post, :comments], 
-    target: "comment_#{id}",
-    partial: "comments/comment",
-    locals: {comment: self , logged_in: true}
+      target: "comment_#{id}",
+      partial: "comments/comment",
+      locals: {comment: self , logged_in: true}
   end
 
 end
