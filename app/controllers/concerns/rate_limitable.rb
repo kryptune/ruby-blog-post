@@ -1,41 +1,35 @@
 module RateLimitable
   extend ActiveSupport::Concern
 
-  def check_rate_limit(limit:, window:)
-    user_id = identify_user_for_limit
-    limiter = SlidingWindowLimiter.new(limit: limit, window: window)
-    allowed, retry_after = limiter.allowed?(user_id)
+  def check_rate_limit
+    limiter = RedisMultiKeyLimiter.new(
+      limits: { ip: 10, email: 5, combo: 3 },
+      window: 600 # 10 minutes
+    )
+
+    allowed, retry_after, message = limiter.allowed?(
+      ip: request.remote_ip,
+      email: params[:email]
+    )
 
     unless allowed
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "flash",
-            partial: "shared/flash",
-            locals: { alert: "Too many attempts. Try again in #{retry_after > 60 ? "#{retry_after / 60} minutes" : "#{retry_after} seconds"}." }
-          ), status: :too_many_requests
-        end
-
-        format.html do
-          flash.now[:alert] = "Too many attempts. Try again in #{retry_after > 60 ? "#{retry_after / 60} minutes" : "#{retry_after} seconds"}."
-          render :login, status: :too_many_requests
-        end
-
-        format.json do
-          render json: {
-            error: "Too many attempts",
-            retry_after: retry_after
-          }, status: :too_many_requests
-        end
+      if request.format.json? || is_api_controller?
+        render json: { error: "Too many attempts", retry_after: retry_after }, status: :too_many_requests unless allowed
+      else
+        render turbo_stream: turbo_stream.replace(
+          "flash",
+          partial: "shared/flash",
+          locals: { alert: "#{message} Try again in #{retry_after > 60 ? "#{retry_after / 60} minutes" : "#{retry_after} seconds"}." }
+        ), status: :too_many_requests
       end
-      return
     end
   end
+
+  
   private
 
-  def identify_user_for_limit
-    request.ip
-  rescue JWT::DecodeError, JWT::ExpiredSignature, TypeError
-    request.ip
+  def is_api_controller?
+    self.class < ActionController::API
   end
+
 end
