@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe TokenManager, type: :controller do
+RSpec.describe WebTokenManager, type: :controller do
   controller(ApplicationController) do
     def index
       render json: { message: "ok" }, status: :ok

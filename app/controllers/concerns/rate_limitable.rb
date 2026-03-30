@@ -34,13 +34,7 @@ module RateLimitable
   private
 
   def identify_user_for_limit
-    decoded = JWT.decode(
-      cookies.signed[:jwt],
-      Rails.application.secret_key_base,
-      true,
-      algorithm: 'HS256'
-    )
-    decoded.first["user_id"].to_s
+    request.ip
   rescue JWT::DecodeError, JWT::ExpiredSignature, TypeError
     request.ip
   end

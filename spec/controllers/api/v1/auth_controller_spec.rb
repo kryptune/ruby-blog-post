@@ -24,7 +24,7 @@ RSpec.describe Api::V1::AuthController, type: :controller do
       it "renders login with alert" do
         post :create, params: { email: user.email, password: "wrong" }
 
-        expect(response).to redirect_to(api_v1_login_path)
+        expect(response).to redirect_to(web_login_path)
         expect(flash[:alert]).to eq("Invalid Credentials.")
       end
     end
@@ -37,7 +37,7 @@ RSpec.describe Api::V1::AuthController, type: :controller do
           post :create, params: { email: unverified_user.email, password: "Password1" }
 
           expect(flash[:alert]).to eq("Please verify your email before logging in.")
-          expect(response).to redirect_to(api_v1_login_path)
+          expect(response).to redirect_to(web_login_path)
         end
       end
     end
@@ -64,7 +64,7 @@ RSpec.describe Api::V1::AuthController, type: :controller do
 
       expect(response.cookies["jwt"]).to be_nil
       expect(response.cookies["refresh_jwt"]).to be_nil
-      expect(response).to redirect_to(api_v1_login_path)
+      expect(response).to redirect_to(web_login_path)
     end
   end
 end

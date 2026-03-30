@@ -1,5 +1,5 @@
 class CommentsController < ApplicationController
-  include RateLimitable, RenderFlash
+  include RateLimitable
   before_action only: [:create] do
     check_rate_limit(limit: 30, window: 60)     # create comment
   end
