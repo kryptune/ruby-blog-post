@@ -6,7 +6,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       it "creates JWT tokens"  do
         post :create, params: { username: "User1", email: "user1@gmail.com", password: "Password1", password_confirmation: "Password1", terms: 1 }
         expect(User.count).to eq(1)
-        expect(response).to redirect_to(api_v1_login_path)
+        expect(response).to redirect_to(web_login_path)
         expect(response.cookies["jwt"]).to be_present
         expect(response.cookies["refresh_jwt"]).to be_present
       end
@@ -31,7 +31,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     context "unsuccessful creation" do
       it "redirects to register page and alert"  do
         post :create, params: { username: "User1", email: "user1@gmail.com", password: "Password2", password_confirmation: "Password1", terms: 1 }
-        expect(response).to redirect_to(api_v1_register_path)
+        expect(response).to redirect_to(web_register_path)
         expect(flash[:alert]).to be_present
       end
     end
@@ -54,7 +54,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
         get :verify, params: {token: "wrongtoken"}
         unverified_user.reload
         expect(flash[:alert]).to include("Invalid or expired verification link.")
-        expect(response).to redirect_to(api_v1_login_path)
+        expect(response).to redirect_to(web_login_path)
       end
     end
   end

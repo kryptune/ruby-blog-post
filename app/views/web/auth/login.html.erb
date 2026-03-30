@@ -10,7 +10,7 @@
       </p>
     </div>
 
-    <%= form_with url: api_v1_login_path, method: :post, local: true, scope: nil do |f| %>
+    <%= form_with url: web_login_path, method: :post, local: true, scope: nil do |f| %>
         <div class="mb-6">
           <%= f.label :email, class: "block text-sm font-semibold text-gray-700 mb-2" %>
           <%= f.email_field :email, 

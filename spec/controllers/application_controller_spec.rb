@@ -21,7 +21,7 @@ RSpec.describe ApplicationController, type: :controller do
 
       it "redirects to login for HTML requests" do
         get :index, format: :html
-        expect(response).to redirect_to(api_v1_login_path)
+        expect(response).to redirect_to(web_login_path)
       end
     end
 

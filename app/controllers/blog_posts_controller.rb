@@ -1,17 +1,16 @@
 class BlogPostsController < ApplicationController
-  include RateLimitable, TokenManager, RenderFlash
-  skip_before_action :authorize, only: [:index, :show, :translate]
+  include RateLimitable
   before_action only: [:create] do
     check_rate_limit(limit: 20, window: 60)     # create post
   end
   before_action :store_user_location!, if: :storable_location?
   before_action :set_blog_post, except: [ :index, :new, :create ]
   before_action :require_verified_user, except: [:index, :show , :translate]
-
+  
   def index
-
-    @blog_posts_all = BlogPost.all.order(updated_at: :desc)
-    @blog_posts = logged_in? ? BlogPost.all.order(updated_at: :desc) : BlogPost.published.order(updated_at: :desc)
+    ordered_blog_posts =  BlogPost.all.order(updated_at: :desc)
+    @blog_posts_all = ordered_blog_posts
+    @blog_posts = logged_in? ? ordered_blog_posts : BlogPost.published.order(updated_at: :desc)
 
     if params[:status].present?
       @blog_posts = @blog_posts.public_send(params[:status])
@@ -33,7 +32,6 @@ class BlogPostsController < ApplicationController
 
   def create
     @blog_post = BlogPost.new(blog_post_params)
-
     set_blog_post_status
 
     if @blog_post.save
@@ -66,9 +64,9 @@ class BlogPostsController < ApplicationController
 
   def destroy
     if @blog_post.destroy
-      redirect_to root_path, notice: "Blog post was successfully deleted."
+      redirect_to blog_posts_path, notice: "Blog post was successfully deleted."
     else
-      redirect_to root_path, alert: "Error deleting blog post."
+      redirect_to blog_posts_path, alert: "Error deleting blog post."
     end
   end
 
@@ -104,7 +102,7 @@ class BlogPostsController < ApplicationController
   end
 
   def require_verified_user
-    redirect_to api_v1_login_path unless current_user&.email_verified
+    redirect_to web_login_path unless current_user&.email_verified
   end
 
   def storable_location?

@@ -1,9 +1,8 @@
 module RenderFlash
   extend ActiveSupport::Concern
 
-  def render_flash(message, path, type: :alert, status: :unprocessable_entity)
+  def render_flash(message, path, type: :alert)
     respond_to do |format|
-      format.json { render json: { error: message }, status: status }
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "flash",
@@ -18,3 +17,5 @@ module RenderFlash
     end
   end
 end
+
+#TODO
