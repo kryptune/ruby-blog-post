@@ -11,6 +11,7 @@ class CommentsController < ApplicationController
     @comment.user = current_user  # assuming you have authentication
 
     if @comment.save
+      @new_comment   = @blog_post.comments.build
       render_flash("Comment added!", @blog_post, type: :notice)
     else
       render "blog_posts/show", status: :unprocessable_entity
@@ -28,7 +29,7 @@ class CommentsController < ApplicationController
 
   def update
     if @comment.update(comment_params)
-      render_flash("Comment has been successfully updated.", @blog_post, type: :notice)
+      respond_to :turbo_stream
     else
       render :edit, status: :unprocessable_entity
     end
