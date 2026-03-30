@@ -98,13 +98,13 @@
 
   <div class="mt-14">
     <% if logged_in? %>
-    <h2 class="text-2xl font-bold text-gray-900 mb-1">Discussion</h2>
-    <p class="text-sm text-gray-400 font-light mb-8">Share your thoughts on this post</p>
-    <turbo-frame id="new_comment">
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">Discussion</h2>
+      <p class="text-sm text-gray-400 font-light mb-8">Share your thoughts on this post</p>
       <div class="bg-white border border-gray-200 rounded-sm shadow-sm p-8 mb-4">
-        <%= render "comments/form", blog_post: @blog_post, comment: @blog_post.comments.build %>
+        <turbo-frame id="new_comment">
+          <%= render "comments/form", blog_post: @blog_post, comment: @blog_post.comments.build %>
+        </turbo-frame>
       </div>
-    </turbo-frame>
     <%end%>
 
     <div id="comments" class="space-y-3">
