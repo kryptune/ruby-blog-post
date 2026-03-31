@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  include RenderFlash, SessionManager
+  include RenderFlash, SessionManager, UserTimeZone
   helper_method :current_user, :logged_in?
   around_action :with_user_time_zone
 
@@ -13,10 +13,6 @@ class ApplicationController < ActionController::Base
     current_user.present?
   end
 
-  def with_user_time_zone(&block)
-    # change 'Asia/Manila' to current_user.time_zone to make it dynamic
-    Time.use_zone('Asia/Manila', &block)
-  end
 
 
 
