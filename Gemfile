@@ -93,3 +93,5 @@ gem "rspec", "~> 3.0"
 gem "httparty"
 
 gem "redis"
+
+gem "interactor"

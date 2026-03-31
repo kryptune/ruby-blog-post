@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
   include RenderFlash, SessionManager
-  before_action :session_logged_in?
   helper_method :current_user, :logged_in?
   around_action :with_user_time_zone
 

@@ -1,22 +1,18 @@
 
     class Web::UsersController < ApplicationController
-      skip_before_action only: [:register, :create, :verify]
       include RateLimitable
-      # before_action only: [:create] do
-      #   check_rate_limit(limit: 3, window: 3600)    # register
-      # end
+      before_action :check_rate_limit, only: [:create]
 
       def register; end
-      
+
       def create 
-        user = User.new(user_params)
-        if user.save
-          deliver_email_to(user)
+        result = RegisterUser.call(user_params)
+        if result.success?
+          deliver_email_to(result.user,  web_verify_url(token: result.user.verification_token))
           redirect_to web_login_path, notice:"Account created, verify your email now!"
         else
-          render_flash(user.errors.full_messages.join(", "), web_register_path)
+          render_flash(result.message, web_register_path)
         end
-
       end
 
       def verify
