@@ -1,48 +1,44 @@
-
 class Web::AuthController < ApplicationController
-  skip_before_action :session_logged_in?, only: [:create, :login]
   include RateLimitable
-  before_action only: [:create] do
-    check_rate_limit(limit: 5, window: 60)      # login
-  end
+  before_action :check_rate_limit, only: [:create]
+  before_action :session_logged_in?, only: [:logout, :logout_all]
 
   def login; end
 
-  # def refresh
-  #   refresh_token = get_refresh_token
-  #   return render_flash("No refresh token provided", web_login_path) if refresh_token.nil?
-  #   user = decode_user_from_token(refresh_token)
-  #   if user.sessions.active.find_by(refresh_token: refresh_token).present?
-  #       refresh_access_token(user, refresh_token)
-  #   else
-  #     render_flash("No refresh token found", web_login_path)
-  #   end
-  # end
-
-
   def create
-    user = User.find_by(email: params[:email])
-    if user&.authenticate(params[:password])
-      if user.email_verified
-        save_session(user)
-        redirect_to blog_posts_path, notice: "Welcome back!"
-      else
-        render_flash("Please verify your email before logging in.", web_login_path )
-      end
+    result =  AuthenticateUser.call(auth_params)
+    if result.success?
+      save_session(result.user)
+      redirect_to blog_posts_path, notice: "Welcome back!"
     else
-      render_flash("Invalid Credentials.", web_login_path)
+      render_flash(result.message, web_login_path)
     end
   end
 
   def logout
-    remove_tokens(current_user)
-    redirect_to web_login_path, notice: "Logged out successfully"
+    result = LogoutUser.call(user: current_user, web: true)
+    if result.success?
+      remove_tokens(current_user)
+      redirect_to web_login_path, notice: result.message
+    else
+      render_flash(result.message, web_login_path)
+    end
   end
 
   def logout_all
-    remove_tokens(current_user)
-    current_user.sessions.destroy_all
-    redirect_to web_login_path, notice: "Logged out from all devices."
+    result = LogoutUser.call(user: current_user, logout_all: true)
+    if result.success?
+      remove_tokens(current_user)
+      redirect_to web_login_path, notice: "Logged out from all devices."
+    else
+      render_flash(result.message, web_login_path)
+    end
   end
+
+  private
+
+    def auth_params
+      params.permit(:email, :password)
+    end
 
 end

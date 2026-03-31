@@ -1,4 +1,3 @@
-Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post   "register",  to:   "users#create"
@@ -11,4 +10,3 @@ Rails.application.routes.draw do
       delete "logout_all", to:  "auth#logout_all"
     end
   end
-end

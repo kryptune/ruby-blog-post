@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe RateLimitable, type: :controller do
   # use AuthController as the test subject since it includes RateLimitable
-  controller(Api::V1::AuthController) do
+  controller(Web::AuthController) do
     def create
       render json: { message: 'ok' }, status: :ok
     end
@@ -17,24 +17,11 @@ RSpec.describe RateLimitable, type: :controller do
 
   describe 'rate limiting by user_id' do
     it 'allows requests under the limit' do
-      # simulate logged in user via signed cookie
-      cookies.signed[:jwt] = JWT.encode(
-        { user_id: user.id, exp: 10.minutes.from_now.to_i },
-        Rails.application.secret_key_base,
-        'HS256'
-      )
-
       post :create
       expect(response).to have_http_status(:ok)
     end
 
     it 'blocks requests over the limit' do
-      cookies.signed[:jwt] = JWT.encode(
-        { user_id: user.id, exp: 10.minutes.from_now.to_i },
-        Rails.application.secret_key_base,
-        'HS256'
-      )
-
       5.times { post :create }  # use up the limit
       post :create              # this should be blocked
       

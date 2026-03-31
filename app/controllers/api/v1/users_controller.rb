@@ -1,18 +1,17 @@
 
     class Api::V1::UsersController < Api::V1::ApiController
-      before_action only: [:create] do
-        check_rate_limit(limit: 3, window: 3600)    # register
-      end
-      
+      before_action :check_rate_limit, only: [:create]
+
       def create 
-        user = User.new(user_params)
-        if user.save
+        result = RegisterUser.call(user_params)
+        if result.success?
+          deliver_email_to(result.user)
           render json: { message: "Account created, verify your email now!" }, status: :ok
-          deliver_email_to(user)
         else
-          render json: { message: "#{user.errors.full_messages.join(", ")}" }, status: :unprocessable_entity
+          render json: { message: result.message }, status: :unprocessable_entity
         end
       end
+
 
       private
 
@@ -21,7 +20,7 @@
       end
 
       def deliver_email_to(user)
-        UserMailer.verification_email(user).deliver_later
+        UserMailer.verification_email(user).deliver_now
       end
 
     end
