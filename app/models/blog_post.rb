@@ -7,6 +7,7 @@ class BlogPost < ApplicationRecord
 
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
+  after_update_commit :broadcast_blog_post_change
   after_create_commit :broadcast_new_blog_post
   after_destroy_commit :broadcast_delete_post
 
@@ -22,14 +23,17 @@ class BlogPost < ApplicationRecord
   end
 
   def broadcast_new_blog_post
-    # Update blog posts grid to show the new post
-     broadcast_prepend_to "blog_posts",
+    # Prepend new post to the grid
+    broadcast_prepend_to "blog_posts",
       target: "blog_posts",
       partial: "blog_posts/blog_post",
       locals: { blog_post: self }
 
-    # Update counter for the new counts
-      broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
+    # Update counter for new counts
+    broadcast_update_to "blog_posts",
+      target: "blog_posts_counter",
+      partial: "blog_posts/counter",
+      locals: { blog_posts: BlogPost.all, logged_in: true }
   end
 
   def broadcast_delete_post
@@ -38,6 +42,11 @@ class BlogPost < ApplicationRecord
 
     # Update counter for the new counts
       broadcast_update_to "blog_posts", target: "blog_posts_counter", partial: "blog_posts/counter" , locals: { blog_posts: BlogPost.all, logged_in: true }
+  end
+
+  def broadcast_blog_post_change
+    # Update blogpost for changes
+      broadcast_replace_to "blog_posts", target: "blog_post_#{id}", partial: "blog_posts/blog_post", locals: { blog_post: self }
   end
 
 end
