@@ -1,3 +1,1 @@
-Rails.application.routes.draw do
-  resources :blog_posts
-end
+resources :blog_posts
