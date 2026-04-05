@@ -7,7 +7,6 @@ module SessionManager
   end
 
   def session_logged_in?
-    return unless current_user # skip if authorize already failed
     session_token = get_session_id
     unless session_token && Session.active.find_by(session_token: session_token)
       remove_tokens(current_user)

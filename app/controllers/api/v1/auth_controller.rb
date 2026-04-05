@@ -1,7 +1,9 @@
 
 class Api::V1::AuthController < Api::V1::ApiController
   include SessionManager, Api::Authenticate
-  before_action :check_rate_limit, only: [:create]
+  before_action only: [:create] do
+    check_rate_limit(:login)    
+  end
   before_action :authenticate, only: [:logout_all]
 
   def login; end

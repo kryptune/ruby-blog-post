@@ -80,6 +80,7 @@ end
 
 group :development do
   gem "rubocop", require: false
+  gem "ruby-lsp", require: false
 end
 
 gem "devise", "~> 5.0"

@@ -1,15 +1,16 @@
 class RedisMultiKeyLimiter
-  def initialize(limits:, window:)
+  def initialize(limits:, window:, scope:)
     @limits = limits
     @window = window
+    @scope = scope
     @redis = Redis.new
   end
 
   def allowed?(ip:, email:)
     email = email.to_s.downcase
-    ip_key    = "login:ip:#{ip}"
-    email_key = "login:email:#{email}"
-    combo_key = "login:combo:#{ip}:#{email}"
+    ip_key    = "#{@scope}:ip:#{ip}"
+    email_key = "#{@scope}:email:#{email}"
+    combo_key = "#{@scope}:combo:#{ip}:#{email}"
 
     results = {
       ip:    increment_with_expiry(ip_key),

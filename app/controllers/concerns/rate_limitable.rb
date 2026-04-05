@@ -1,15 +1,25 @@
 module RateLimitable
   extend ActiveSupport::Concern
 
-  def check_rate_limit
-    limiter = RedisMultiKeyLimiter.new(
-      limits: { ip: 10, email: 5, combo: 3 },
-      window: 600 # 10 minutes
-    )
+  def check_rate_limit(resource)
+    rate_limit = case resource
+                  when :blog_post
+                    { limits: { ip: 20, email: 10, combo: 5 }, window: 1200 } # 20 mins
+                  when :comment
+                    { limits: { ip: 20, email: 10, combo: 5 }, window: 300 }  # 5 mins
+                  when :login, :register
+                    { limits: { ip: 10, email: 5, combo: 3 }, window: 600 }   # 10 mins
+                  else
+                    raise ArgumentError, "Unknown resource: #{resource}"
+                  end
 
+
+
+    limiter = RedisMultiKeyLimiter.new(**rate_limit.merge(scope: resource))
+    #TODO
     allowed, retry_after, message = limiter.allowed?(
       ip: request.remote_ip,
-      email: params[:email]
+      email: params[:email] || current_user.email
     )
 
     unless allowed

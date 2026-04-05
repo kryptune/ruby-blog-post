@@ -1,4 +1,4 @@
-class CommentsController < ApplicationController
+class Api::V1::CommentsController < Api::V1::ApiController
   include RateLimitable
   before_action only: [:create] do
     check_rate_limit(:comment)     # create comment
@@ -8,13 +8,12 @@ class CommentsController < ApplicationController
   def create
     @blog_post = BlogPost.find(params[:blog_post_id])
     @comment   = @blog_post.comments.build(comment_params)
-    @comment.user = current_user  # assuming you have authentication
-
+    @comment.user = current_user
     if @comment.save
       @new_comment   = @blog_post.comments.build
-      render_flash("Comment added!", @blog_post, type: :notice)
+      render :create, status: :created, formats: [:json]
     else
-      render "blog_posts/show", status: :unprocessable_entity
+      render json: { errors: @blog_post.errors }, status: :unprocessable_entity
     end
   end
 

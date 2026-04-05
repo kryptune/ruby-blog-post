@@ -1,6 +1,8 @@
 class Web::AuthController < ApplicationController
   include RateLimitable
-  before_action :check_rate_limit, only: [:create]
+  before_action only: [:create] do
+    check_rate_limit(:login)    
+  end
   before_action :session_logged_in?, only: [:logout, :logout_all]
 
   def login; end
