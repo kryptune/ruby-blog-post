@@ -108,7 +108,7 @@
     <%end%>
 
     <div id="comments" class="space-y-3">
-      <%= render @comments, logged_in: logged_in? %>
+      <%= render @comments, logged_in: logged_in?, current_user: current_user %>
     </div>
   </div>
 
