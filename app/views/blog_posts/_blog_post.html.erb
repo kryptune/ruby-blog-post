@@ -6,15 +6,16 @@
       <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
         <%= link_to blog_post.title, blog_post, class: "hover:underline" %>
       </h2>
-
-      <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3 h-[42px] ">
-        <%= truncate(blog_post.body, length: 80) %>
-      </p>
-      
-      <% if (image = blog_post.images.first) && image.variable? %>
-        <%= image_tag image.variant(resize_to_fill: [300, 180]) %>
-      <% end %>
-      <%= turbo_stream_from "blog_posts" %>
+      <div id="blog_post_body_<%= blog_post.id %>">
+        <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3 h-[42px] ">
+          <%= truncate(blog_post.body, length: 80) %>
+        </p>
+      </div>
+      <div id="blog_post_image_<%= blog_post.id %>">
+        <% if (image = blog_post.images.first) && image.variable? %>
+          <%= image_tag url_for(image.variant(resize_to_fill: [300, 180])) + "?#{blog_post.updated_at.to_i}" %>
+        <% end %>
+      </div>
       <%= render "blog_posts/status" , blog_post: blog_post %>
 
     </div>
