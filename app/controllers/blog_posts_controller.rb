@@ -1,18 +1,22 @@
 class BlogPostsController < ApplicationController
-  include RateLimitable
-  before_action only: [:create] do
-    check_rate_limit(limit: 20, window: 60)     # create post
+  include RateLimitable, SetBlogPostStatus
+  before_action only: [:create, :update] do
+    check_rate_limit(:blog_post)
   end
+  before_action :session_logged_in?, except: [:index, :show , :translate]
   before_action :store_user_location!, if: :storable_location?
   before_action :set_blog_post, except: [ :index, :new, :create ]
   before_action :require_verified_user, except: [:index, :show , :translate]
+  ALLOWED_STATUSES = %w[published draft scheduled]
+
   
   def index
     ordered_blog_posts =  BlogPost.all.order(updated_at: :desc)
     @blog_posts_all = ordered_blog_posts
     @blog_posts = logged_in? ? ordered_blog_posts : BlogPost.published.order(updated_at: :desc)
 
-    if params[:status].present?
+
+    if params[:status].present? && ALLOWED_STATUSES.include?(params[:status])
       @blog_posts = @blog_posts.public_send(params[:status])
     end
 
@@ -32,7 +36,7 @@ class BlogPostsController < ApplicationController
 
   def create
     @blog_post = BlogPost.new(blog_post_params)
-    set_blog_post_status
+    set_blog_post_status(@blog_post)
 
     if @blog_post.save
       redirect_to @blog_post, notice: "Blog post was successfully created."
@@ -43,22 +47,13 @@ class BlogPostsController < ApplicationController
 
   def edit; end
 
+  
   def update
-    @blog_post.assign_attributes(blog_post_params.except(:images))
-    set_blog_post_status
-    if  @blog_post.save
-      if blog_post_params[:images]
-        @blog_post.images.attach(blog_post_params[:images])
-      end
-      # Purge selected images
-      if params[:blog_post][:remove_images]
-        params[:blog_post][:remove_images].each do |id|
-          @blog_post.images.find(id).purge
-        end
-      end
-      redirect_to @blog_post, notice: "Blog post was successfully updated."
+    result = UpdateBlogPost.call(params: blog_post_params, blog_post: @blog_post, remove_images: params[:blog_post][:remove_images])
+    if result.success?
+     redirect_to @blog_post, notice: "Blog post was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render_flash("Failed to update Blog post.", edit_blog_posts_path)
     end
   end
 
@@ -66,7 +61,7 @@ class BlogPostsController < ApplicationController
     if @blog_post.destroy
       redirect_to blog_posts_path, notice: "Blog post was successfully deleted."
     else
-      redirect_to blog_posts_path, alert: "Error deleting blog post."
+      render_flash("Error deleting blog post.", blog_posts_path )
     end
   end
 
@@ -75,7 +70,6 @@ class BlogPostsController < ApplicationController
       result = translator.translate(@blog_post.body, params[:lang] || "es")
       @translated_body = result.to_s # force string
       render partial: "blog_posts/translate", locals: { translated_body: @translated_body }
-      Rails.logger.info "Translated body: #{@translated_body.inspect}"
   end 
 
 
@@ -88,17 +82,7 @@ class BlogPostsController < ApplicationController
   def set_blog_post
     @blog_post = logged_in? ? BlogPost.all.find(params[:id]) : BlogPost.published.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "Blog post not found."
-  end
-
-  def set_blog_post_status
-    if @blog_post.published_at == nil
-      @blog_post.draft!
-    elsif  @blog_post.published_at > Time.current
-      @blog_post.scheduled!
-    else
-      @blog_post.published!
-    end
+    render_flash("Blog post not found.", blog_posts_path)
   end
 
   def require_verified_user

@@ -1,6 +1,7 @@
 module Api
   module ApiTokenManager
     extend ActiveSupport::Concern
+    include Api::Errorable
 
     def encode_token(payload)
       JWT.encode(payload, ENV['JWT_SECRET_KEY'], 'HS256')
@@ -17,9 +18,10 @@ module Api
       [access_token, refresh_token]
     end
 
-    def get_header_token(header: "Authorization")
-      token = request.headers[header]
-      token&.start_with?("Bearer ") ? token.split(" ").last : nil
+    def get_header_token
+      raw_token = request.headers["Authorization"]
+      unauthorized_req("Token not found") unless raw_token
+      raw_token&.start_with?("Bearer ") ? raw_token.split(" ").last : nil
     end
 
     def json_opts(message, access_token, refresh_token = nil, user: nil, status: :ok)
@@ -50,10 +52,14 @@ module Api
       begin
         decoded = decode_token(token)
         User.find_by(id: decoded[0]["user_id"])
-      rescue JWT::ExpiredSignature, JWT::DecodeError
-        render json: { error: "Session expired or invalid" }, status: :unauthorized
-        nil
+      rescue JWT::ExpiredSignature
+          unauthorized_req("Expired Signature")
+          nil
+      rescue JWT::DecodeError
+          unauthorized_req("Invalid Token")
+          nil
       end
     end
+
   end
 end
