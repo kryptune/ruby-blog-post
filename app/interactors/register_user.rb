@@ -4,7 +4,7 @@ class RegisterUser
   def call 
     user = User.new(context.to_h)
     if user.save
-      context.user = user
+      context.user_id = user.id
     else
       context.fail!(message: user.errors.full_messages.join(", "))
     end
