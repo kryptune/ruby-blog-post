@@ -10,4 +10,9 @@ class Api::V1::ApiController < ActionController::API
   def logged_in?
     current_user.present?
   end
+
+  rescue_from ActiveRecord::RecordInvalid do |e|
+    render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+  end
+  
 end
