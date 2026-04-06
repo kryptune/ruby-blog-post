@@ -3,6 +3,8 @@ class User < ApplicationRecord
   before_create :generate_verification_token
   has_many :comments, dependent: :destroy
   has_many :sessions, dependent: :destroy
+  has_many :blog_post, dependent: :destroy
+
 
   # validates :password, presence: true, confirmation: true,
   #                      length: { minimum: 8,

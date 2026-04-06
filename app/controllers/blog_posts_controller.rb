@@ -13,11 +13,11 @@ class BlogPostsController < ApplicationController
   def index
     ordered_blog_posts =  BlogPost.all.order(updated_at: :desc)
     @blog_posts_all = ordered_blog_posts
-    @blog_posts = logged_in? ? ordered_blog_posts : BlogPost.published.order(updated_at: :desc)
+    @blog_posts =  BlogPost.published.order(updated_at: :desc)
 
-
+    @user_blog_posts = ordered_blog_posts.where(user_id: current_user.id) if logged_in?
     if params[:status].present? && ALLOWED_STATUSES.include?(params[:status])
-      @blog_posts = @blog_posts.public_send(params[:status])
+      @blog_posts = @user_blog_posts.public_send(params[:status])
     end
 
     @blog_posts = @blog_posts.order(created_at: :desc)
@@ -36,6 +36,7 @@ class BlogPostsController < ApplicationController
 
   def create
     @blog_post = BlogPost.new(blog_post_params)
+    @blog_post.user_id = current_user.id
     set_blog_post_status(@blog_post)
 
     if @blog_post.save
