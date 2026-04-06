@@ -15,7 +15,7 @@ class BlogPostsController < ApplicationController
     @blog_posts_all = ordered_blog_posts
     @blog_posts =  BlogPost.published.order(updated_at: :desc)
 
-    @user_blog_posts = ordered_blog_posts.where(user_id: current_user.id)
+    @user_blog_posts = ordered_blog_posts.where(user_id: current_user.id) if logged_in?
     if params[:status].present? && ALLOWED_STATUSES.include?(params[:status])
       @blog_posts = @user_blog_posts.public_send(params[:status])
     end
